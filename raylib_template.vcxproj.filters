@@ -21,9 +21,15 @@
     <ClCompile Include="Source\level.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\level.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\entity.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
