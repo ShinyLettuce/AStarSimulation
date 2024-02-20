@@ -1,4 +1,5 @@
 #pragma once
+#include "raylib.h"
 
 class Level {
 public:
@@ -11,6 +12,10 @@ public:
 					 0,0,0,0,0,0,0,0,
 					 0,0,0,0,0,0,0,0,
 					 0,0,0,0,0,0,0,0 };
+
+	Vector2 gridPosition = { 148,148 };
+	int gridSide = 8;
+	int tilePixelSide = 64;
 
 	void update();
 	void render();
