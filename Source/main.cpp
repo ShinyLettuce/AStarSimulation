@@ -1,5 +1,5 @@
 #include "raylib.h"
-#include "level.h"
+#include "simManager.h"
 
 int main(void)
 {    
@@ -10,7 +10,7 @@ int main(void)
 
     SetTargetFPS(60);
 
-    Level level;
+    SimManager simulation;
 
     while (!WindowShouldClose())
     {
@@ -18,9 +18,9 @@ int main(void)
         BeginDrawing();
         ClearBackground(BLACK);
 
-        level.update();
-        level.render();
-
+        simulation.update();
+        simulation.render();
+       
         EndDrawing();
     }
     

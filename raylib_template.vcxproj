@@ -98,10 +98,12 @@
     <ClCompile Include="Source\entity.cpp" />
     <ClCompile Include="Source\level.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\simManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\entity.h" />
     <ClInclude Include="Source\level.h" />
+    <ClInclude Include="Source\simManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
