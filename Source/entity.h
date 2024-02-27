@@ -7,7 +7,7 @@ public:
 	Vector2 pos = { 0,0 };
 
 	virtual void update() = 0;
-	virtual void render() = 0;
+	virtual void render(Vector2 gridPos, float tileSide) = 0;
 
 	virtual ~Entity() {};
 };
@@ -15,13 +15,13 @@ public:
 class StarChaser : public Entity
 {
 public:
-	StarChaser(Vector2 position)
+	StarChaser()
 	{
-		pos = position;
+		pos = {0,0};
 	}
 
 	void update() override;
-	void render() override;
+	void render(Vector2 gridPos, float tileSide) override;
 
 	~StarChaser() {};
 };
@@ -29,13 +29,13 @@ public:
 class FallenStar : public Entity
 {
 public:
-	FallenStar(Vector2 position)
+	FallenStar()
 	{
-		pos = position;
+		pos = {1,0};
 	}
 
 	void update() override;
-	void render() override;
+	void render(Vector2 gridPos, float tileSide) override;
 
 	~FallenStar() {};
 };
@@ -43,13 +43,13 @@ public:
 class SpaceShip : public Entity
 {
 public:
-	SpaceShip(Vector2 position)
+	SpaceShip()
 	{
-		pos = position;
+		pos = {2,0};
 	}
 
 	void update() override;
-	void render() override;
+	void render(Vector2 gridPos, float tileSide) override;
 
 	~SpaceShip() {};
 };
@@ -57,13 +57,13 @@ public:
 class TradingPost : public Entity
 {
 public:
-	TradingPost(Vector2 position)
+	TradingPost()
 	{
-		pos = position;
+		pos = {3,0};
 	}
 
 	void update() override;
-	void render() override;
+	void render(Vector2 gridPos, float tileSide) override;
 
 	~TradingPost() {};
 };

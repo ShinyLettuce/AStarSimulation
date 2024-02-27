@@ -14,8 +14,8 @@ public:
 					 0,0,0,0,0,0,0,0 };
 
 	Vector2 gridPosition = { 148,148 };
-	int gridSide = 8;
-	int tilePixelSide = 64;
+	float gridSide = 8;
+	float tilePixelSide = 64;
 
 	void update();
 	void render();

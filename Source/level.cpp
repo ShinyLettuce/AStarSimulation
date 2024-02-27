@@ -7,36 +7,37 @@ void Level::update()
 
 void Level::render()
 {
-	for (int i = 0; i < gridSide + 1; i++)
+	for (float i = 0; i < gridSide + 1; i++)
 	{
-		DrawLine
+		DrawLineV
 		(
-			(int)gridPosition.x + i * tilePixelSide,
-			(int)gridPosition.y,
-			(int)gridPosition.x + i * tilePixelSide,
-			(int)gridPosition.y + tilePixelSide * gridSide,
+			{ gridPosition.x + i * tilePixelSide, gridPosition.y },
+			{ gridPosition.x + i * tilePixelSide, gridPosition.y + tilePixelSide * gridSide },
 			WHITE
 		);
 	}
-	for (int i = 0; i < gridSide + 1; i++)
+	for (float i = 0; i < gridSide + 1; i++)
 	{
-		DrawLine
+		DrawLineV
 		(
-			(int)gridPosition.x,
-			(int)gridPosition.y + i * tilePixelSide,
-			(int)gridPosition.x + tilePixelSide * gridSide,
-			(int)gridPosition.y + i * tilePixelSide,
+			{ gridPosition.x, gridPosition.y + i * tilePixelSide },
+			{ gridPosition.x + tilePixelSide * gridSide, gridPosition.y + i * tilePixelSide },
 			WHITE
 		);
 	}
 
-	for (int i = 0; i < gridSide; i++)
+	for (float i = 0; i < gridSide; i++)
 	{
-		for (int j = 0; j < gridSide; j++)
+		for (float j = 0; j < gridSide; j++)
 		{
-			if (grid[j + i * gridSide] == 1)
+			if (grid[(int)(j + i * gridSide)] == 1)
 			{
-				DrawRectangle((int)gridPosition.x + j * tilePixelSide, (int)gridPosition.y + i * tilePixelSide, tilePixelSide,tilePixelSide,WHITE);
+				DrawRectangleV
+				(
+					{ gridPosition.x + j * tilePixelSide, gridPosition.y + i * tilePixelSide },
+					{ tilePixelSide, tilePixelSide },
+					WHITE
+				);
 			}
 		}
 	}
