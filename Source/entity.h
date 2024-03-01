@@ -16,6 +16,18 @@ public:
 class StarChaser : public Entity
 {
 public:
+
+	enum class ChaserState
+	{
+		STAR,
+		TRADING,
+		SHIP,
+	};
+
+	ChaserState currentState = ChaserState::STAR;
+
+	bool holdingStar = false;
+
 	StarChaser()
 	{
 		pos = {0,0};

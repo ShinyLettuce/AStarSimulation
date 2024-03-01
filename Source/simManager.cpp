@@ -106,7 +106,15 @@ void SimManager::update()
 	}
 	if (currentState == SimState::RUNNING)
 	{
-
+		switch (bountyHunterRoy.currentState)
+		{
+		case StarChaser::ChaserState::STAR:
+			break;
+		case StarChaser::ChaserState::TRADING:
+			break;
+		case StarChaser::ChaserState::SHIP:
+			break;
+		}
 	}
 }
 
