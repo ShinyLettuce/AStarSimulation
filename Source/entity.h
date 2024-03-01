@@ -5,6 +5,7 @@ class Entity
 {
 public:
 	Vector2 pos = { 0,0 };
+	Color color = WHITE;
 
 	virtual void update() = 0;
 	virtual void render(Vector2 gridPos, float tileSide) = 0;
@@ -18,6 +19,7 @@ public:
 	StarChaser()
 	{
 		pos = {0,0};
+		color = LIGHTGRAY;
 	}
 
 	void update() override;
@@ -32,6 +34,7 @@ public:
 	FallenStar()
 	{
 		pos = {1,0};
+		color = YELLOW;
 	}
 
 	void update() override;
@@ -46,6 +49,7 @@ public:
 	SpaceShip()
 	{
 		pos = {2,0};
+		color = GREEN;
 	}
 
 	void update() override;
@@ -60,6 +64,7 @@ public:
 	TradingPost()
 	{
 		pos = {3,0};
+		color = RED;
 	}
 
 	void update() override;

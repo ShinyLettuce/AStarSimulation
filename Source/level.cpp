@@ -30,7 +30,7 @@ void Level::render()
 	{
 		for (float j = 0; j < gridSide; j++)
 		{
-			if (grid[(int)(j + i * gridSide)] == 1)
+			if (grid[(int)(j + i * gridSide)].isBlocked)
 			{
 				DrawRectangleV
 				(
