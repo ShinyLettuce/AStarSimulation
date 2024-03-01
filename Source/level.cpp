@@ -5,6 +5,12 @@ void Level::update()
 
 }
 
+std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
+{
+	//A* logic here?
+}
+
+
 void Level::render()
 {
 	for (float i = 0; i < gridSide + 1; i++)

@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include <vector>
 
 class Node {
 public:
@@ -31,6 +32,8 @@ public:
 			}
 		}
 	}
+
+	std::vector<Node> findPath(Vector2 startPosition, Vector2 goalPosition);
 
 	void update();
 	void render();
