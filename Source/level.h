@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include <cmath>
 #include <vector>
 
 class Node {
@@ -11,10 +12,18 @@ public:
 	int fCost = 0;
 
 	bool isBlocked = false;
+
+	Node* cameFrom = nullptr;
+
+	bool operator==(const Node& other) const {
+		return position.x == other.position.x && position.y == other.position.y;
+	}
 };
 
 class Level {
 public:
+	int straightCost = 10;
+	int diagonalCost = 14;
 
 	Node grid[64];
 
@@ -33,6 +42,8 @@ public:
 		}
 	}
 
+	std::vector<Vector2> getNeighborVector(Vector2 currentPosition);
+	int distanceBetween(Vector2 pos1, Vector2 pos2);
 	std::vector<Node> findPath(Vector2 startPosition, Vector2 goalPosition);
 
 	void update();
