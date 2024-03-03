@@ -109,31 +109,69 @@ void SimManager::update()
 		switch (bountyHunterRoy.currentState)
 		{
 		case StarChaser::ChaserState::STAR:
+			if (!pathCalculated)
+			{
+				aStarPath = level.findPath(level.grid[(int)(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
+										   level.grid[(int)(fallenStar.pos.x + fallenStar.pos.y * level.gridSide)]);
+				pathCalculated = true;
+				bountyHunterRoy.pathTraversalIndex = 1;
+			}
+			else
+			{
+				if (bountyHunterRoy.timer == 31)
+				{
+					bountyHunterRoy.pos = aStarPath[bountyHunterRoy.pathTraversalIndex].position;
+
+					if (bountyHunterRoy.pos.x == fallenStar.pos.x &&
+						bountyHunterRoy.pos.y == fallenStar.pos.y)
+					{
+						bountyHunterRoy.currentState = StarChaser::ChaserState::TRADING;
+						pathCalculated = false;
+					}
+					else
+					{
+						bountyHunterRoy.pathTraversalIndex++;
+					}
+					bountyHunterRoy.timer = 0;
+				}
+				bountyHunterRoy.timer++;
+			}
+
 			break;
 		case StarChaser::ChaserState::TRADING:
+			if (!pathCalculated)
+			{
+				aStarPath = level.findPath(level.grid[(int)(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
+					level.grid[(int)(tradingPost.pos.x + tradingPost.pos.y * level.gridSide)]);
+				pathCalculated = true;
+				bountyHunterRoy.pathTraversalIndex = 1;
+			}
+			else
+			{
+				if (bountyHunterRoy.timer == 31)
+				{
+					bountyHunterRoy.pos = aStarPath[bountyHunterRoy.pathTraversalIndex].position;
+
+					if (bountyHunterRoy.pos.x == tradingPost.pos.x &&
+						bountyHunterRoy.pos.y == tradingPost.pos.y)
+					{
+						bountyHunterRoy.currentState = StarChaser::ChaserState::SHIP;
+						pathCalculated = false;
+					}
+					else
+					{
+						bountyHunterRoy.pathTraversalIndex++;
+					}
+					bountyHunterRoy.timer = 0;
+				}
+				bountyHunterRoy.timer++;
+			}
 			break;
 		case StarChaser::ChaserState::SHIP:
+
 			break;
 		}
 
-		if (!pathCalculated)
-		{
-			aStarPath = level.findPath(level.grid[(int)(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
-									   level.grid[(int)(fallenStar.pos.x + fallenStar.pos.y * level.gridSide)]);
-			pathCalculated = true;
-		}
-		else
-		{
-			for (Node& n : aStarPath)
-			{
-				DrawRectangleV
-				(
-					{ level.gridPosition.x + n.position.x * level.tilePixelSide, level.gridPosition.y + n.position.y * level.tilePixelSide },
-					{ level.tilePixelSide, level.tilePixelSide },
-					GREEN
-				);
-			}
-		}
 	}
 }
 
@@ -149,6 +187,15 @@ void SimManager::render()
 		DrawText("5. Space Ship", 560, 700, 32, spaceShip.color);
 	}
 
+	for (Node& n : aStarPath)
+	{
+		DrawRectangleV
+		(
+			{ level.gridPosition.x + n.position.x * level.tilePixelSide, level.gridPosition.y + n.position.y * level.tilePixelSide },
+			{ level.tilePixelSide, level.tilePixelSide },
+			GREEN
+		);
+	}
 	level.render();
 	spaceShip.render(level.gridPosition, level.tilePixelSide);
 	tradingPost.render(level.gridPosition, level.tilePixelSide);

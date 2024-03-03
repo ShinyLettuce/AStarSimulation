@@ -25,8 +25,10 @@ public:
 	};
 
 	ChaserState currentState = ChaserState::STAR;
-
-	bool holdingStar = false;
+	int timer = 1;
+	int pathTraversalIndex = 1;
+	int currentStamina = 60;
+	int maxStamina = 60;
 
 	StarChaser()
 	{
