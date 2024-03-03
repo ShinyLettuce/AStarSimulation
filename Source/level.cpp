@@ -14,7 +14,7 @@ int Level::distanceBetween(Vector2 pos1, Vector2 pos2)
 	return std::min(distanceX, distanceY) * diagonalCost + remaining * straightCost;
 }
 
-std::vector<Node*> Level::getNeighborVector(Vector2 currentPosition) //change to store positions instead. This simply copies data and not instances
+std::vector<Node*> Level::getNeighborVector(Vector2 currentPosition)
 {
 	std::vector<Node*> neighborVector = {};
 	if (currentPosition.x - 1 >= 0)
@@ -102,7 +102,6 @@ std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 
 	while (openList.size() > 0)
 	{
-		//problem: checks entire grid and not open list
 		// make into function
 		int lowestFCost = INT16_MAX;
 		int lowFIndex = 0;
@@ -118,7 +117,6 @@ std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 
 		if (*currentNode == goalNode)
 		{
-			//YAY WE DID IT
 			return buildPath(goalNode);
 		}
 
