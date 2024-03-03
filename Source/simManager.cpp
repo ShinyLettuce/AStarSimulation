@@ -115,6 +115,25 @@ void SimManager::update()
 		case StarChaser::ChaserState::SHIP:
 			break;
 		}
+
+		if (!pathCalculated)
+		{
+			aStarPath = level.findPath(level.grid[(int)(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
+									   level.grid[(int)(fallenStar.pos.x + fallenStar.pos.y * level.gridSide)]);
+			pathCalculated = true;
+		}
+		else
+		{
+			for (Node& n : aStarPath)
+			{
+				DrawRectangleV
+				(
+					{ level.gridPosition.x + n.position.x * level.tilePixelSide, level.gridPosition.y + n.position.y * level.tilePixelSide },
+					{ level.tilePixelSide, level.tilePixelSide },
+					GREEN
+				);
+			}
+		}
 	}
 }
 

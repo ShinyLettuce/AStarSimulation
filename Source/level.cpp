@@ -14,48 +14,48 @@ int Level::distanceBetween(Vector2 pos1, Vector2 pos2)
 	return std::min(distanceX, distanceY) * diagonalCost + remaining * straightCost;
 }
 
-std::vector<Vector2> Level::getNeighborVector(Vector2 currentPosition) //change to store positions instead. This simply copies data and not instances
+std::vector<Node*> Level::getNeighborVector(Vector2 currentPosition) //change to store positions instead. This simply copies data and not instances
 {
-	std::vector<Vector2> neighborVector = {};
+	std::vector<Node*> neighborVector = {};
 	if (currentPosition.x - 1 >= 0)
 	{
 		//left
-		neighborVector.push_back({ currentPosition.x - 1, currentPosition.y });
+		neighborVector.push_back(&grid[(int)(currentPosition.x - 1 + (currentPosition.y) * gridSide)]);
 		if (currentPosition.y - 1 >= 0)
 		{
 			//left up
-			neighborVector.push_back({ currentPosition.x - 1, currentPosition.y - 1 });
+			neighborVector.push_back(&grid[(int)(currentPosition.x - 1 + (currentPosition.y - 1) * gridSide)]);
 		}
-		if (currentPosition.y + 1 <= gridSide)
+		if (currentPosition.y + 1 < gridSide)
 		{
 			//left down
-			neighborVector.push_back({ currentPosition.x - 1, currentPosition.y + 1 });
+			neighborVector.push_back(&grid[(int)(currentPosition.x - 1 + (currentPosition.y + 1) * gridSide)]);
 		}
 	}
-	if (currentPosition.x + 1 <= gridSide)
+	if (currentPosition.x + 1 < gridSide)
 	{
 		//right
-		neighborVector.push_back({ currentPosition.x + 1, currentPosition.y });
+		neighborVector.push_back(&grid[(int)(currentPosition.x + 1 + (currentPosition.y) * gridSide)]);
 		if (currentPosition.y - 1 >= 0)
 		{
 			//right up
-			neighborVector.push_back({ currentPosition.x + 1, currentPosition.y - 1 });
+			neighborVector.push_back(&grid[(int)(currentPosition.x + 1 + (currentPosition.y - 1) * gridSide)]);
 		}
-		if (currentPosition.y + 1 <= gridSide)
+		if (currentPosition.y + 1 < gridSide)
 		{
 			//right down
-			neighborVector.push_back({ currentPosition.x + 1, currentPosition.y + 1 });
+			neighborVector.push_back(&grid[(int)(currentPosition.x + 1 + (currentPosition.y + 1) * gridSide)]);
 		}
 	}
-	if (currentPosition.y + 1 <= gridSide)
+	if (currentPosition.y + 1 < gridSide)
 	{
 		//down
-		neighborVector.push_back({ currentPosition.x, currentPosition.y + 1 });
+		neighborVector.push_back(&grid[(int)(currentPosition.x + (currentPosition.y + 1) * gridSide)]);
 	}
 	if (currentPosition.y - 1 >= 0)
 	{
 		//up
-		neighborVector.push_back({ currentPosition.x, currentPosition.y - 1 });
+		neighborVector.push_back(&grid[(int)(currentPosition.x + (currentPosition.y - 1) * gridSide)]);
 	}
 
 	return neighborVector;
@@ -74,24 +74,19 @@ std::vector<Node> Level::buildPath(Node goalNode)
 	return finalPath;
 }
 
-std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
+std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 {
 	// Code logic inspired by and translated from CodeMonkey's C# Unity scripts of the A* algorithm
 	// provided as study material
 
-	Node startNode;
-	Node goalNode;
-	startNode.position = startPosition;
-	goalNode.position = goalPosition;
-
-
-	std::vector<Node> openList = { startNode };
-	std::vector<Node> closedList = {};
+	std::vector<Node*> openList = { &startNode };
+	std::vector<Node*> closedList = {};
 
 	for (int i = 0; i < gridSide; i++)
 	{
-		for (int j = 0, gridIndex = j + i * (int)gridSide; j < gridSide; j++) // IF SOMETHING FUCKS UP, CHECK THIS
+		for (int j = 0, gridIndex = 0; j < gridSide; j++)
 		{
+			gridIndex = j + i * (int)gridSide;
 			grid[gridIndex].gCost = INT16_MAX;
 			grid[gridIndex].fCost = grid[gridIndex].gCost + grid[gridIndex].hCost;
 			grid[gridIndex].cameFrom = nullptr;
@@ -99,30 +94,29 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 	}
 
 	startNode.gCost = 0;
-	startNode.hCost = distanceBetween(startPosition, goalPosition);
+	startNode.hCost = distanceBetween(startNode.position, goalNode.position);
 	startNode.fCost = startNode.gCost + startNode.hCost;
+
 
 	//Add first visual here
 
 	while (openList.size() > 0)
 	{
+		//problem: checks entire grid and not open list
 		// make into function
 		int lowestFCost = INT16_MAX;
 		int lowFIndex = 0;
-		for (int i = 0; i < gridSide; i++)
+		for (int i = 0; i < openList.size(); i++)
 		{
-			for (int j = 0, gridIndex = j + i * (int)gridSide; j < gridSide; j++) // IF SOMETHING FUCKS UP, CHECK THIS
+			if (openList[i]->fCost < lowestFCost)
 			{
-				if (grid[gridIndex].fCost < lowestFCost)
-				{
-					lowestFCost = grid[gridIndex].fCost;
-					lowFIndex = gridIndex;
-				}
+				lowestFCost = openList[i]->fCost;
+				lowFIndex = i;
 			}
 		}
-		Node currentNode = grid[lowFIndex];
+		Node* currentNode = openList[lowFIndex];
 
-		if (currentNode == goalNode)
+		if (*currentNode == goalNode)
 		{
 			//YAY WE DID IT
 			return buildPath(goalNode);
@@ -132,19 +126,19 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 				std::remove_if(
 					openList.begin(),
 					openList.end(),
-					[&currentNode](Node n) {return n == currentNode; }),
+					[&currentNode](Node* n) {return n == currentNode; }),
 				openList.end());
 
 		closedList.push_back(currentNode);
 
 		//go through neighboring nodes
-		for (Vector2 v : getNeighborVector(currentNode.position)) //TODO: v is bad naming, change to neighbor
+		for (Node* v : getNeighborVector(currentNode->position)) //TODO: v is bad naming, change to neighbor
 		{
 			//Node neighbor = grid[static_cast<int>(v.x + v.y * gridSide)]; WAIT FOR NOW, COULD CAUSE COPY ISSUE
 
 			bool isInClosed = std::any_of(closedList.begin(), closedList.end(), //ChatGPT used to help formulate lambda syntax
-				[&v](Node& n) { 
-					return n.position.x == v.x && n.position.y == v.y;
+				[&v](Node* n) { 
+					return n == v;
 				});
 
 			if (isInClosed)
@@ -152,27 +146,27 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 				continue;
 			}
 
-			if (grid[static_cast<int>(v.x + v.y * gridSide)].isBlocked)
+			if (v->isBlocked)
 			{
-				closedList.push_back(grid[static_cast<int>(v.x + v.y * gridSide)]);
+				closedList.push_back(v);
 				continue;
 			}
 
-			int prelimGCost = currentNode.gCost + distanceBetween(currentNode.position, v);
-			if (prelimGCost < grid[static_cast<int>(v.x + v.y * gridSide)].gCost)
+			int prelimGCost = currentNode->gCost + distanceBetween(currentNode->position, v->position);
+			if (prelimGCost < v->gCost)
 			{
-				grid[static_cast<int>(v.x + v.y * gridSide)].cameFrom = &currentNode;
-				grid[static_cast<int>(v.x + v.y * gridSide)].gCost = prelimGCost;
-				grid[static_cast<int>(v.x + v.y * gridSide)].hCost = distanceBetween(v, goalPosition);
-				grid[static_cast<int>(v.x + v.y * gridSide)].fCost = grid[static_cast<int>(v.x + v.y * gridSide)].gCost + grid[static_cast<int>(v.x + v.y * gridSide)].hCost;
+				v->cameFrom = currentNode;
+				v->gCost = prelimGCost;
+				v->hCost = distanceBetween(v->position, goalNode.position);
+				v->fCost = v->gCost + v->hCost;
 
 				bool isInOpen = std::any_of(openList.begin(), openList.end(), //ChatGPT used to help formulate lambda syntax
-					[&v](Node& n) {
-						return n.position.x == v.x && n.position.y == v.y;
+					[&v](Node* n) {
+						return n == v;
 					});
 				if (!isInOpen)
 				{
-					openList.push_back(grid[static_cast<int>(v.x + v.y * gridSide)]);
+					openList.push_back(v);
 				}
 			}
 		}

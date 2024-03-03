@@ -11,6 +11,9 @@ public:
 	TradingPost tradingPost;
 	SpaceShip spaceShip;
 
+	bool pathCalculated = false;
+	std::vector<Node> aStarPath = {};
+
 	enum class SimState
 	{
 		EDIT,

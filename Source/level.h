@@ -45,10 +45,10 @@ public:
 		}
 	}
 
-	std::vector<Vector2> getNeighborVector(Vector2 currentPosition);
+	std::vector<Node*> getNeighborVector(Vector2 currentPosition);
 	int distanceBetween(Vector2 pos1, Vector2 pos2);
 	std::vector<Node> buildPath(Node endNode);
-	std::vector<Node> findPath(Vector2 startPosition, Vector2 goalPosition);
+	std::vector<Node> findPath(Node& startNode, Node& goalNode);
 
 	void update();
 	void render();
