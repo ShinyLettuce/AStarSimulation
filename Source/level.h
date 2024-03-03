@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <cmath>
+#include <algorithm>
 #include <vector>
 
 class Node {
@@ -15,6 +16,8 @@ public:
 
 	Node* cameFrom = nullptr;
 
+	//ChatGPT used to help formulate operator overloading syntax
+	//because raylib for some stupid reason didn't make Vector2 comparisons a thing
 	bool operator==(const Node& other) const {
 		return position.x == other.position.x && position.y == other.position.y;
 	}
@@ -44,6 +47,7 @@ public:
 
 	std::vector<Vector2> getNeighborVector(Vector2 currentPosition);
 	int distanceBetween(Vector2 pos1, Vector2 pos2);
+	std::vector<Node> buildPath(Node endNode);
 	std::vector<Node> findPath(Vector2 startPosition, Vector2 goalPosition);
 
 	void update();

@@ -61,10 +61,23 @@ std::vector<Vector2> Level::getNeighborVector(Vector2 currentPosition) //change 
 	return neighborVector;
 }
 
+std::vector<Node> Level::buildPath(Node goalNode)
+{
+	std::vector<Node> finalPath = {};
+	finalPath.push_back(goalNode);
+	Node currentNode = goalNode;
+	while (currentNode.cameFrom != nullptr)
+	{
+		finalPath.insert(finalPath.begin(), *currentNode.cameFrom);
+		currentNode = *currentNode.cameFrom;
+	}
+	return finalPath;
+}
+
 std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 {
-	// Code logic inspired by CodeMonkey's Unity scripts of the A* algorithm
-	// provided by the course responsible
+	// Code logic inspired by and translated from CodeMonkey's C# Unity scripts of the A* algorithm
+	// provided as study material
 
 	Node startNode;
 	Node goalNode;
@@ -77,7 +90,7 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 
 	for (int i = 0; i < gridSide; i++)
 	{
-		for (int j = 0, gridIndex = j + i * gridSide; j < gridSide; j++) // IF SOMETHING FUCKS UP, CHECK THIS
+		for (int j = 0, gridIndex = j + i * (int)gridSide; j < gridSide; j++) // IF SOMETHING FUCKS UP, CHECK THIS
 		{
 			grid[gridIndex].gCost = INT16_MAX;
 			grid[gridIndex].fCost = grid[gridIndex].gCost + grid[gridIndex].hCost;
@@ -98,7 +111,7 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 		int lowFIndex = 0;
 		for (int i = 0; i < gridSide; i++)
 		{
-			for (int j = 0, gridIndex = j + i * gridSide; j < gridSide; j++) // IF SOMETHING FUCKS UP, CHECK THIS
+			for (int j = 0, gridIndex = j + i * (int)gridSide; j < gridSide; j++) // IF SOMETHING FUCKS UP, CHECK THIS
 			{
 				if (grid[gridIndex].fCost < lowestFCost)
 				{
@@ -112,7 +125,7 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 		if (currentNode == goalNode)
 		{
 			//YAY WE DID IT
-			//calcualtePath logic here
+			return buildPath(goalNode);
 		}
 
 		openList.erase(
@@ -125,12 +138,46 @@ std::vector<Node> Level::findPath(Vector2 startPosition, Vector2 goalPosition)
 		closedList.push_back(currentNode);
 
 		//go through neighboring nodes
-		for (Vector2 n : getNeighborVector(currentNode.position))
+		for (Vector2 v : getNeighborVector(currentNode.position)) //TODO: v is bad naming, change to neighbor
 		{
+			//Node neighbor = grid[static_cast<int>(v.x + v.y * gridSide)]; WAIT FOR NOW, COULD CAUSE COPY ISSUE
 
+			bool isInClosed = std::any_of(closedList.begin(), closedList.end(), //ChatGPT used to help formulate lambda syntax
+				[&v](Node& n) { 
+					return n.position.x == v.x && n.position.y == v.y;
+				});
+
+			if (isInClosed)
+			{
+				continue;
+			}
+
+			if (grid[static_cast<int>(v.x + v.y * gridSide)].isBlocked)
+			{
+				closedList.push_back(grid[static_cast<int>(v.x + v.y * gridSide)]);
+				continue;
+			}
+
+			int prelimGCost = currentNode.gCost + distanceBetween(currentNode.position, v);
+			if (prelimGCost < grid[static_cast<int>(v.x + v.y * gridSide)].gCost)
+			{
+				grid[static_cast<int>(v.x + v.y * gridSide)].cameFrom = &currentNode;
+				grid[static_cast<int>(v.x + v.y * gridSide)].gCost = prelimGCost;
+				grid[static_cast<int>(v.x + v.y * gridSide)].hCost = distanceBetween(v, goalPosition);
+				grid[static_cast<int>(v.x + v.y * gridSide)].fCost = grid[static_cast<int>(v.x + v.y * gridSide)].gCost + grid[static_cast<int>(v.x + v.y * gridSide)].hCost;
+
+				bool isInOpen = std::any_of(openList.begin(), openList.end(), //ChatGPT used to help formulate lambda syntax
+					[&v](Node& n) {
+						return n.position.x == v.x && n.position.y == v.y;
+					});
+				if (!isInOpen)
+				{
+					openList.push_back(grid[static_cast<int>(v.x + v.y * gridSide)]);
+				}
+			}
 		}
 	}
-
+	return {}; //NOTHING, NO MORE NODES IN OPEN LIST
 }
 
 
