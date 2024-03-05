@@ -51,7 +51,7 @@ void SimManager::starChaserMove(Vector2 goal, StarChaser::ChaserState newState)
 		return;
 	}
 
-	if (bountyHunterRoy.holdingStar)
+	if (bountyHunterRoy.holdingStar && aStarPath.size() > 1)
 	{
 		bountyHunterRoy.currentStamina -= level.distanceBetween(bountyHunterRoy.pos, aStarPath[bountyHunterRoy.pathTraversalIndex].position);
 
