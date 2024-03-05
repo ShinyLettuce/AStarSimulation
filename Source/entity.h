@@ -63,7 +63,7 @@ public:
 	SpaceShip()
 	{
 		pos = {2,0};
-		color = GREEN;
+		color = PURPLE;
 	}
 
 	void render(Vector2 gridPos, float tileSide) override;
