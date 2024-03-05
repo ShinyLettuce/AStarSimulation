@@ -2,6 +2,7 @@
 #include "level.h"
 #include "entity.h"
 #include "cmath"
+#include "utils.h"
 
 class SimManager {
 public:
@@ -37,8 +38,8 @@ public:
 
 	Vector2 mouseTileCollision();
 
-	float random_float01();
-	float random_float_in_range(float min, float max);
+	void initSim();
+	void randomizeSim();
 
 	void initNewPath(Vector2 goal);
 	void starChaserMove(Vector2 goal, StarChaser::ChaserState newState);

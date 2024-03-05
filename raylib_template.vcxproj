@@ -99,11 +99,13 @@
     <ClCompile Include="Source\level.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\simManager.cpp" />
+    <ClCompile Include="Source\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\entity.h" />
     <ClInclude Include="Source\level.h" />
     <ClInclude Include="Source\simManager.h" />
+    <ClInclude Include="Source\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

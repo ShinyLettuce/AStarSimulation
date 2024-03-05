@@ -1,13 +1,52 @@
 #include "simManager.h"
 
-float SimManager::random_float01()
+void SimManager::initSim()
 {
-	return rand() / static_cast<float>(RAND_MAX);
+	currentState = SimState::RUNNING;
+	victory = true;
+	pathCalculated = false;
+	bountyHunterRoy.starSold = false;
+	bountyHunterRoy.currentStamina = bountyHunterRoy.maxStamina;
+	bountyHunterRoy.currentState = StarChaser::ChaserState::STAR;
 }
 
-float SimManager::random_float_in_range(float min, float max)
+void SimManager::randomizeSim()
 {
-	return random_float01() * (max - min) + min;
+	for (int i = 0; i < level.gridSide; i++)
+	{
+		for (int j = 0; j < level.gridSide; j++)
+		{
+			level.grid[j + i * static_cast<int>(level.gridSide)].isBlocked = false;
+			if (random_float_in_range(1, 10) > 8)
+			{
+				level.grid[j + i * static_cast<int>(level.gridSide)].isBlocked = true;
+			}
+		}
+	}
+
+	do
+	{
+		bountyHunterRoy.pos.x = trunc(random_float_in_range(0, level.gridSide));
+		bountyHunterRoy.pos.y = trunc(random_float_in_range(0, level.gridSide));
+	} while (level.grid[static_cast<int>(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)].isBlocked);
+
+	do
+	{
+		fallenStar.pos.x = trunc(random_float_in_range(0, level.gridSide));
+		fallenStar.pos.y = trunc(random_float_in_range(0, level.gridSide));
+	} while (level.grid[static_cast<int>(fallenStar.pos.x + fallenStar.pos.y * level.gridSide)].isBlocked);
+
+	do
+	{
+		tradingPost.pos.x = trunc(random_float_in_range(0, level.gridSide));
+		tradingPost.pos.y = trunc(random_float_in_range(0, level.gridSide));
+	} while (level.grid[static_cast<int>(tradingPost.pos.x + tradingPost.pos.y * level.gridSide)].isBlocked);
+
+	do
+	{
+		spaceShip.pos.x = trunc(random_float_in_range(0, level.gridSide));
+		spaceShip.pos.y = trunc(random_float_in_range(0, level.gridSide));
+	} while (level.grid[static_cast<int>(spaceShip.pos.x + spaceShip.pos.y * level.gridSide)].isBlocked);
 }
 
 Vector2 SimManager::mouseTileCollision()
@@ -21,11 +60,11 @@ Vector2 SimManager::mouseTileCollision()
 				GetMousePosition().y >= level.gridPosition.y + i * level.tilePixelSide &&
 				GetMousePosition().y <= level.gridPosition.y + (i + 1) * level.tilePixelSide)
 			{
-				return { (float)j, (float)i };
+				return { static_cast<float>(j), static_cast<float>(i) };
 			}
 		}
 	}
-	throw;
+	return { 0,0 };
 }
 
 void SimManager::initNewPath(Vector2 goal)
@@ -74,7 +113,7 @@ void SimManager::starChaserMove(Vector2 goal, StarChaser::ChaserState newState)
 		fallenStar.pos = bountyHunterRoy.pos;
 	}
 
-	if (bountyHunterRoy.pos.x == goal.x && bountyHunterRoy.pos.y == goal.y)
+	if (bountyHunterRoy.pos == goal)
 	{
 		if (bountyHunterRoy.currentState == StarChaser::ChaserState::TRADING)
 		{
@@ -125,14 +164,13 @@ void SimManager::update()
 		{
 			editState = EditState::SHIP;
 		}
+		if (IsKeyPressed(KEY_T))
+		{
+			randomizeSim();
+		}
 		if (IsKeyPressed(KEY_SPACE))
 		{
-			currentState = SimState::RUNNING;
-			victory = true;
-			pathCalculated = false;
-			bountyHunterRoy.starSold = false;
-			bountyHunterRoy.currentStamina = bountyHunterRoy.maxStamina;
-			bountyHunterRoy.currentState = StarChaser::ChaserState::STAR;
+			initSim();
 		}
 
 		bool hit = false;
@@ -235,17 +273,19 @@ void SimManager::update()
 
 void SimManager::render()
 {
-	if (currentState == SimState::EDIT)
+	switch (currentState)
 	{
+	case SimState::EDIT:
 		DrawText("-Press space to start-", 200, 80, 36, WHITE);
 		DrawText("1. Block", 20, 700, 32, WHITE);
 		DrawText("2. Star Chaser", 20, 732, 32, bountyHunterRoy.color);
 		DrawText("3. Fallen Star", 280, 700, 32, fallenStar.color);
 		DrawText("4. Trading Post", 280, 732, 32, tradingPost.color);
 		DrawText("5. Space Ship", 560, 700, 32, spaceShip.color);
-	}
-	if (currentState == SimState::RUNNING)
-	{
+		DrawText("T. randomize", 560, 732, 32, PINK);
+		break;
+
+	case SimState::RUNNING:
 		for (Node& n : aStarPath)
 		{
 			DrawRectangleV
@@ -255,18 +295,23 @@ void SimManager::render()
 				GREEN
 			);
 		}
+		break;
+
+	case SimState::FINISHED:
+		if (victory)
+		{
+			DrawText("- Bounty hunter Roy prevails! -", 122, 80, 36, WHITE);
+			DrawText("Press R to return", 245, 700, 36, WHITE);
+		}
+		else
+		{
+			DrawText("- Bounty hunter Roy could not feed -", 60, 40, 36, WHITE);
+			DrawText("- his family! -", 290, 80, 36, WHITE);
+			DrawText("Press R to return", 245, 700, 36, WHITE);
+		}
+		break;
 	}
-	if (currentState == SimState::FINISHED && victory)
-	{
-		DrawText("- Bounty hunter Roy prevails! -", 122, 80, 36, WHITE);
-		DrawText("Press R to return", 245, 700, 36, WHITE);
-	}
-	else if (currentState == SimState::FINISHED && !victory)
-	{
-		DrawText("- Bounty hunter Roy could not feed -", 60, 40, 36, WHITE);
-		DrawText("- his family! -", 290, 80, 36, WHITE);
-		DrawText("Press R to return", 245, 700, 36, WHITE);
-	}
+
 	level.render();
 	spaceShip.render(level.gridPosition, level.tilePixelSide);
 	fallenStar.render(level.gridPosition, level.tilePixelSide);

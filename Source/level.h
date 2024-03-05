@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "utils.h"
 #include <cmath>
 #include <algorithm>
 #include <vector>
@@ -34,7 +35,6 @@ public:
 			for (float j = 0; j < gridSide; j++)
 			{
 				grid[static_cast<int>(j + i * gridSide)].position = { j,i };
-				//randomize block positions here?
 			}
 		}
 	}
@@ -44,6 +44,5 @@ public:
 	std::vector<Node> buildPath(Node endNode);
 	std::vector<Node> findPath(Node& startNode, Node& goalNode);
 
-	void update();
 	void render();
 };

@@ -1,10 +1,5 @@
 #include "level.h"
 
-void Level::update()
-{
-
-}
-
 int Level::distanceBetween(Vector2 pos1, Vector2 pos2)
 {
 	int distanceX = abs(static_cast<int>(pos1.x - pos2.x));
@@ -76,9 +71,6 @@ std::vector<Node> Level::buildPath(Node goalNode)
 
 std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 {
-	// Code logic inspired by and translated from CodeMonkey's C# Unity scripts of the A* algorithm
-	// provided as study material
-
 	std::vector<Node*> openList = { &startNode };
 	std::vector<Node*> closedList = {};
 
@@ -97,12 +89,8 @@ std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 	startNode.hCost = distanceBetween(startNode.position, goalNode.position);
 	startNode.fCost = startNode.gCost + startNode.hCost;
 
-
-	//Add first visual here
-
 	while (openList.size() > 0)
 	{
-		// make into function
 		int lowestFCost = INT16_MAX;
 		int lowFIndex = 0;
 		for (int i = 0; i < openList.size(); i++)
@@ -129,14 +117,12 @@ std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 
 		closedList.push_back(currentNode);
 
-		//go through neighboring nodes
-		for (Node* v : getNeighborVector(currentNode->position)) //TODO: v is bad naming, change to neighbor
+		for (Node* neighbor : getNeighborVector(currentNode->position))
 		{
-			//Node neighbor = grid[static_cast<int>(v.x + v.y * gridSide)]; WAIT FOR NOW, COULD CAUSE COPY ISSUE
 
-			bool isInClosed = std::any_of(closedList.begin(), closedList.end(), //ChatGPT used to help formulate lambda syntax
-				[&v](Node* n) { 
-					return n == v;
+			bool isInClosed = std::any_of(closedList.begin(), closedList.end(),
+				[&neighbor](Node* n) {
+					return n == neighbor;
 				});
 
 			if (isInClosed)
@@ -144,32 +130,32 @@ std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 				continue;
 			}
 
-			if (v->isBlocked)
+			if (neighbor->isBlocked)
 			{
-				closedList.push_back(v);
+				closedList.push_back(neighbor);
 				continue;
 			}
 
-			int prelimGCost = currentNode->gCost + distanceBetween(currentNode->position, v->position);
-			if (prelimGCost < v->gCost)
+			int prelimGCost = currentNode->gCost + distanceBetween(currentNode->position, neighbor->position);
+			if (prelimGCost < neighbor->gCost)
 			{
-				v->cameFrom = currentNode;
-				v->gCost = prelimGCost;
-				v->hCost = distanceBetween(v->position, goalNode.position);
-				v->fCost = v->gCost + v->hCost;
+				neighbor->cameFrom = currentNode;
+				neighbor->gCost = prelimGCost;
+				neighbor->hCost = distanceBetween(neighbor->position, goalNode.position);
+				neighbor->fCost = neighbor->gCost + neighbor->hCost;
 
-				bool isInOpen = std::any_of(openList.begin(), openList.end(), //ChatGPT used to help formulate lambda syntax
-					[&v](Node* n) {
-						return n == v;
+				bool isInOpen = std::any_of(openList.begin(), openList.end(),
+					[&neighbor](Node* n) {
+						return n == neighbor;
 					});
 				if (!isInOpen)
 				{
-					openList.push_back(v);
+					openList.push_back(neighbor);
 				}
 			}
 		}
 	}
-	return {}; //NOTHING, NO MORE NODES IN OPEN LIST
+	return {};
 }
 
 
