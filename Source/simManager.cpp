@@ -28,6 +28,79 @@ Vector2 SimManager::mouseTileCollision()
 	throw;
 }
 
+void SimManager::initNewPath(Vector2 goal)
+{
+	aStarPath = level.findPath(level.grid[static_cast<int>(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
+							   level.grid[static_cast<int>(goal.x + goal.y * level.gridSide)]);
+	pathCalculated = true;
+	bountyHunterRoy.pathTraversalIndex = 1;
+
+	if (aStarPath.size() == 0)
+	{
+		victory = false;
+		currentState = SimState::FINISHED;
+	}
+}
+
+void SimManager::starChaserMove(Vector2 goal, StarChaser::ChaserState newState)
+{
+	bountyHunterRoy.timer++;
+
+	if (bountyHunterRoy.timer != 31)
+	{
+		return;
+	}
+
+	if (bountyHunterRoy.holdingStar)
+	{
+		bountyHunterRoy.currentStamina -= level.distanceBetween(bountyHunterRoy.pos, aStarPath[bountyHunterRoy.pathTraversalIndex].position);
+
+	}
+	if (bountyHunterRoy.currentStamina <= 0 && bountyHunterRoy.holdingStar)
+	{
+		bountyHunterRoy.currentState = StarChaser::ChaserState::SHIP;
+		bountyHunterRoy.holdingStar = false;
+		pathCalculated = false;
+		bountyHunterRoy.timer = 0;
+		return;
+	}
+
+	if (aStarPath.size() > 1)
+	{
+		bountyHunterRoy.pos = aStarPath[bountyHunterRoy.pathTraversalIndex].position;
+	}
+	if (bountyHunterRoy.holdingStar)
+	{
+		fallenStar.pos = bountyHunterRoy.pos;
+	}
+
+	if (bountyHunterRoy.pos.x == goal.x && bountyHunterRoy.pos.y == goal.y)
+	{
+		if (bountyHunterRoy.currentState == StarChaser::ChaserState::TRADING)
+		{
+			bountyHunterRoy.holdingStar = false;
+			bountyHunterRoy.starSold = true;
+		}
+		if (bountyHunterRoy.currentState == StarChaser::ChaserState::STAR)
+		{
+			bountyHunterRoy.holdingStar = true;
+		}
+		if (bountyHunterRoy.currentState == StarChaser::ChaserState::SHIP)
+		{
+			bountyHunterRoy.currentStamina = bountyHunterRoy.maxStamina;
+		}
+
+		bountyHunterRoy.currentState = newState;
+		pathCalculated = false;
+	}
+	else
+	{
+		bountyHunterRoy.pathTraversalIndex++;
+	}
+
+	bountyHunterRoy.timer = 0;
+}
+
 void SimManager::update()
 {
 	if (currentState == SimState::EDIT)
@@ -55,6 +128,11 @@ void SimManager::update()
 		if (IsKeyPressed(KEY_SPACE))
 		{
 			currentState = SimState::RUNNING;
+			victory = true;
+			pathCalculated = false;
+			bountyHunterRoy.starSold = false;
+			bountyHunterRoy.currentStamina = bountyHunterRoy.maxStamina;
+			bountyHunterRoy.currentState = StarChaser::ChaserState::STAR;
 		}
 
 		bool hit = false;
@@ -70,38 +148,30 @@ void SimManager::update()
 			hitPosition = mouseTileCollision();
 		}
 
-		switch (editState)
+		if (hit)
 		{
-		case EditState::BLOCK:
-			if (hit)
+			switch (editState)
 			{
+			case EditState::BLOCK:
 				level.grid[(int)hitPosition.x + (int)hitPosition.y * (int)level.gridSide].isBlocked = !level.grid[(int)hitPosition.x + (int)hitPosition.y * (int)level.gridSide].isBlocked;
-			}
-			break;
-		case EditState::STARCHASER:
-			if (hit)
-			{
+				break;
+
+			case EditState::STARCHASER:
 				bountyHunterRoy.pos = hitPosition;
-			}
-			break;
-		case EditState::STAR:
-			if (hit)
-			{
+				break;
+
+			case EditState::STAR:
 				fallenStar.pos = hitPosition;
-			}
-			break;
-		case EditState::SHIP:
-			if (hit)
-			{
+				break;
+
+			case EditState::SHIP:
 				spaceShip.pos = hitPosition;
-			}
-			break;
-		case EditState::TRADING:
-			if (hit)
-			{
+				break;
+
+			case EditState::TRADING:
 				tradingPost.pos = hitPosition;
+				break;
 			}
-			break;
 		}
 	}
 	if (currentState == SimState::RUNNING)
@@ -111,67 +181,55 @@ void SimManager::update()
 		case StarChaser::ChaserState::STAR:
 			if (!pathCalculated)
 			{
-				aStarPath = level.findPath(level.grid[(int)(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
-										   level.grid[(int)(fallenStar.pos.x + fallenStar.pos.y * level.gridSide)]);
-				pathCalculated = true;
-				bountyHunterRoy.pathTraversalIndex = 1;
+				initNewPath(fallenStar.pos);
 			}
 			else
 			{
-				if (bountyHunterRoy.timer == 31)
-				{
-					bountyHunterRoy.pos = aStarPath[bountyHunterRoy.pathTraversalIndex].position;
-
-					if (bountyHunterRoy.pos.x == fallenStar.pos.x &&
-						bountyHunterRoy.pos.y == fallenStar.pos.y)
-					{
-						bountyHunterRoy.currentState = StarChaser::ChaserState::TRADING;
-						pathCalculated = false;
-					}
-					else
-					{
-						bountyHunterRoy.pathTraversalIndex++;
-					}
-					bountyHunterRoy.timer = 0;
-				}
-				bountyHunterRoy.timer++;
+				starChaserMove(fallenStar.pos, StarChaser::ChaserState::TRADING);
 			}
-
 			break;
+
 		case StarChaser::ChaserState::TRADING:
 			if (!pathCalculated)
 			{
-				aStarPath = level.findPath(level.grid[(int)(bountyHunterRoy.pos.x + bountyHunterRoy.pos.y * level.gridSide)],
-					level.grid[(int)(tradingPost.pos.x + tradingPost.pos.y * level.gridSide)]);
-				pathCalculated = true;
-				bountyHunterRoy.pathTraversalIndex = 1;
+				initNewPath(tradingPost.pos);
 			}
 			else
 			{
-				if (bountyHunterRoy.timer == 31)
-				{
-					bountyHunterRoy.pos = aStarPath[bountyHunterRoy.pathTraversalIndex].position;
-
-					if (bountyHunterRoy.pos.x == tradingPost.pos.x &&
-						bountyHunterRoy.pos.y == tradingPost.pos.y)
-					{
-						bountyHunterRoy.currentState = StarChaser::ChaserState::SHIP;
-						pathCalculated = false;
-					}
-					else
-					{
-						bountyHunterRoy.pathTraversalIndex++;
-					}
-					bountyHunterRoy.timer = 0;
-				}
-				bountyHunterRoy.timer++;
+				starChaserMove(tradingPost.pos, StarChaser::ChaserState::SHIP);
 			}
 			break;
-		case StarChaser::ChaserState::SHIP:
 
+		case StarChaser::ChaserState::SHIP:
+			if (!pathCalculated)
+			{
+				initNewPath(spaceShip.pos);
+			}
+			else
+			{
+				if (bountyHunterRoy.starSold)
+				{
+					starChaserMove(spaceShip.pos, StarChaser::ChaserState::FINISHED);
+				}
+				else
+				{
+					starChaserMove(spaceShip.pos, StarChaser::ChaserState::STAR);
+				}
+			}
+			break;
+
+		case StarChaser::ChaserState::FINISHED:
+			currentState = SimState::FINISHED;
 			break;
 		}
 
+	}
+	if (currentState == SimState::FINISHED)
+	{
+		if (IsKeyPressed(KEY_R))
+		{
+			currentState = SimState::EDIT;
+		}
 	}
 }
 
@@ -186,20 +244,32 @@ void SimManager::render()
 		DrawText("4. Trading Post", 280, 732, 32, tradingPost.color);
 		DrawText("5. Space Ship", 560, 700, 32, spaceShip.color);
 	}
-
-	for (Node& n : aStarPath)
+	if (currentState == SimState::RUNNING)
 	{
-		DrawRectangleV
-		(
-			{ level.gridPosition.x + n.position.x * level.tilePixelSide, level.gridPosition.y + n.position.y * level.tilePixelSide },
-			{ level.tilePixelSide, level.tilePixelSide },
-			GREEN
-		);
+		for (Node& n : aStarPath)
+		{
+			DrawRectangleV
+			(
+				{ level.gridPosition.x + n.position.x * level.tilePixelSide, level.gridPosition.y + n.position.y * level.tilePixelSide },
+				{ level.tilePixelSide, level.tilePixelSide },
+				GREEN
+			);
+		}
+	}
+	if (currentState == SimState::FINISHED && victory)
+	{
+		DrawText("- Bounty hunter Roy prevails! -", 122, 80, 36, WHITE);
+		DrawText("Press R to return", 245, 700, 36, WHITE);
+	}
+	else if (currentState == SimState::FINISHED && !victory)
+	{
+		DrawText("- Bounty hunter Roy could not feed -", 60, 40, 36, WHITE);
+		DrawText("- his family! -", 290, 80, 36, WHITE);
+		DrawText("Press R to return", 245, 700, 36, WHITE);
 	}
 	level.render();
 	spaceShip.render(level.gridPosition, level.tilePixelSide);
-	tradingPost.render(level.gridPosition, level.tilePixelSide);
 	fallenStar.render(level.gridPosition, level.tilePixelSide);
+	tradingPost.render(level.gridPosition, level.tilePixelSide);
 	bountyHunterRoy.render(level.gridPosition, level.tilePixelSide);
-	//show graphically which states that are toggled
 }

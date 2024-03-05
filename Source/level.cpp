@@ -115,7 +115,7 @@ std::vector<Node> Level::findPath(Node& startNode, Node& goalNode)
 		}
 		Node* currentNode = openList[lowFIndex];
 
-		if (*currentNode == goalNode)
+		if (currentNode == &goalNode)
 		{
 			return buildPath(goalNode);
 		}

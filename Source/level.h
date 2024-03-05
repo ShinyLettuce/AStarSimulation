@@ -15,12 +15,6 @@ public:
 	bool isBlocked = false;
 
 	Node* cameFrom = nullptr;
-
-	//ChatGPT used to help formulate operator overloading syntax
-	//because raylib for some stupid reason didn't make Vector2 comparisons a thing
-	bool operator==(const Node& other) const {
-		return position.x == other.position.x && position.y == other.position.y;
-	}
 };
 
 class Level {

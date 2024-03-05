@@ -7,7 +7,6 @@ public:
 	Vector2 pos = { 0,0 };
 	Color color = WHITE;
 
-	virtual void update() = 0;
 	virtual void render(Vector2 gridPos, float tileSide) = 0;
 
 	virtual ~Entity() {};
@@ -22,6 +21,7 @@ public:
 		STAR,
 		TRADING,
 		SHIP,
+		FINISHED
 	};
 
 	ChaserState currentState = ChaserState::STAR;
@@ -29,6 +29,8 @@ public:
 	int pathTraversalIndex = 1;
 	int currentStamina = 60;
 	int maxStamina = 60;
+	bool holdingStar = false;
+	bool starSold = false;
 
 	StarChaser()
 	{
@@ -36,7 +38,6 @@ public:
 		color = LIGHTGRAY;
 	}
 
-	void update() override;
 	void render(Vector2 gridPos, float tileSide) override;
 
 	~StarChaser() {};
@@ -51,7 +52,6 @@ public:
 		color = YELLOW;
 	}
 
-	void update() override;
 	void render(Vector2 gridPos, float tileSide) override;
 
 	~FallenStar() {};
@@ -66,7 +66,6 @@ public:
 		color = GREEN;
 	}
 
-	void update() override;
 	void render(Vector2 gridPos, float tileSide) override;
 
 	~SpaceShip() {};
@@ -81,7 +80,6 @@ public:
 		color = RED;
 	}
 
-	void update() override;
 	void render(Vector2 gridPos, float tileSide) override;
 
 	~TradingPost() {};

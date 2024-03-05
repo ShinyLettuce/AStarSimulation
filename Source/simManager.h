@@ -12,12 +12,14 @@ public:
 	SpaceShip spaceShip;
 
 	bool pathCalculated = false;
+	bool victory = true;
 	std::vector<Node> aStarPath = {};
 
 	enum class SimState
 	{
 		EDIT,
-		RUNNING
+		RUNNING,
+		FINISHED
 	};
 
 	SimState currentState = SimState::EDIT;
@@ -37,6 +39,9 @@ public:
 
 	float random_float01();
 	float random_float_in_range(float min, float max);
+
+	void initNewPath(Vector2 goal);
+	void starChaserMove(Vector2 goal, StarChaser::ChaserState newState);
 
 	void update();
 	void render();
